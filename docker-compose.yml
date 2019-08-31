@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  web:
+    build: .
+    tty: true
+    init: true
+    command: ruby server.rb -o 0.0.0.0
+    volumes:
+      - ./server.rb:/usr/src/app/server.rb
+      - ./views:/usr/src/app/views
+    ports:
+      - 4567:4567
+  ws:
+    build: .
+    tty: true
+    init: true
+    command: ruby ws_server.rb
+    volumes:
+      - ./ws_server.rb:/usr/src/app/ws_server.rb
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 8888:8888
