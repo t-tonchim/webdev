@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/attach/attach.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css">
   <title></title>
 </head>
 <body>
  <div id="terminal"></div>
   <script>
+     Terminal.applyAddon(attach)
     const term = new Terminal()
     term.open(document.getElementById('terminal'))
-    term.write
+    const ws = new WebSocket('ws://localhost:8888/?cmd=irb')
+    ws.onopen = res => term.attach(ws)
   </script>
 </body>
 </html>
