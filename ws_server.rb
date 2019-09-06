@@ -34,7 +34,7 @@ EM::WebSocket.start(host: '0.0.0.0', port: 8888) do |conn|
     response_buffer = ''
 
     until finished
-      stream[:input].expect(/(irb\(main\):\d{3}:0>) |(.*)\n/) do |m|
+      stream[:input].expect(/(irb\(main\):\d{3}:0[>*]) |(.*)\n/) do |m|
         conn.close && break if m.nil?
 
         if m[1]
