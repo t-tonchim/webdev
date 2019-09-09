@@ -31,27 +31,30 @@ EM::WebSocket.start(host: '0.0.0.0', port: 8888) do |conn|
   conn.onmessage do |message|
     stream = @store[conn.object_id]
     if message != "\r"
-      if message == "\b"
-        stream[:buf].slice!(0, stream[:buf] - 1)
+      if message == "\u007F"
+        next if stream[:buf].length == 0
+
+        stream[:buf] = stream[:buf].slice(0, stream[:buf].length - 1)
+        conn.send("\b \b")
       else
         stream[:buf] << message
+        conn.send(message)
       end
-      conn.send(message)
     else
-      stream[:output].puts(stream[:buf])
+      stream[:buf] << "\r"
+      stream[:output].print(stream[:buf])
       finished = false
-      response_buffer = ''
+      response_buffer = stream[:buf].chomp == "" ? "\n\r" : "\r"
 
       until finished
-        stream[:input].expect(/(irb\(main\):\d{3}:0[>*]) |(.*)\n/) do |m|
+        stream[:input].expect(/(irb\(main\):\d{3}:0[>*]) |(.*)\R/) do |m|
           conn.close && break if m.nil?
 
           if m[1]
             response_buffer << "#{m[1]} "
             finished = true
           else
-            p m[0]
-            response_buffer << m[0] if stream[:buf].chomp != m[0].chomp
+            response_buffer << m[0] if stream[:buf].chomp != m[0].chomp #|| m[0].chomp != ''
           end
         end
       end
